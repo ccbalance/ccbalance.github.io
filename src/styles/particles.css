@@ -1,0 +1,321 @@
+/* CCBalance - 粒子样式 */
+
+/* 背景粒子画布 */
+#bg-particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* 游戏粒子画布 */
+.game-particles-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+    display: none;
+}
+
+#game-screen.active .game-particles-canvas {
+    display: block;
+}
+
+/* 粒子基础样式 */
+.particle {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    will-change: transform, opacity;
+}
+
+/* 分子粒子 */
+.particle-molecule {
+    background: radial-gradient(circle, var(--primary-color) 0%, transparent 70%);
+    box-shadow: 0 0 10px var(--primary-color);
+}
+
+/* 离子粒子 */
+.particle-ion-positive {
+    background: radial-gradient(circle, var(--danger-color) 0%, transparent 70%);
+    box-shadow: 0 0 10px var(--danger-color);
+}
+
+.particle-ion-negative {
+    background: radial-gradient(circle, var(--primary-color) 0%, transparent 70%);
+    box-shadow: 0 0 10px var(--primary-color);
+}
+
+/* 产物粒子 */
+.particle-product {
+    background: radial-gradient(circle, var(--secondary-color) 0%, transparent 70%);
+    box-shadow: 0 0 10px var(--secondary-color);
+}
+
+/* 沉淀粒子 */
+.particle-precipitate {
+    background: radial-gradient(circle, var(--warning-color) 0%, transparent 70%);
+    box-shadow: 0 0 8px var(--warning-color);
+}
+
+/* 气泡粒子 */
+.particle-gas {
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, transparent 70%);
+    box-shadow: 0 0 6px rgba(255, 255, 255, 0.5);
+}
+
+/* 能量粒子 */
+.particle-energy {
+    background: radial-gradient(circle, var(--accent-color) 0%, transparent 70%);
+    box-shadow: 0 0 15px var(--accent-color);
+}
+
+/* 粒子轨迹 */
+.particle-trail {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0.3;
+}
+
+/* 粒子流动效果 */
+.flow-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* 曼陀罗图案容器 */
+.mandala-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 300px;
+    height: 300px;
+}
+
+.mandala-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 1px solid rgba(0, 212, 255, 0.2);
+    border-radius: 50%;
+    animation: mandala-rotate 20s linear infinite;
+}
+
+.mandala-ring:nth-child(1) {
+    width: 100px;
+    height: 100px;
+    animation-duration: 15s;
+}
+
+.mandala-ring:nth-child(2) {
+    width: 150px;
+    height: 150px;
+    animation-duration: 20s;
+    animation-direction: reverse;
+}
+
+.mandala-ring:nth-child(3) {
+    width: 200px;
+    height: 200px;
+    animation-duration: 25s;
+}
+
+.mandala-ring:nth-child(4) {
+    width: 250px;
+    height: 250px;
+    animation-duration: 30s;
+    animation-direction: reverse;
+}
+
+@keyframes mandala-rotate {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* 粒子发光效果 */
+.glow-effect {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--primary-color) 0%, transparent 70%);
+    filter: blur(20px);
+    opacity: 0.5;
+    animation: glow-pulse 3s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.2); opacity: 0.8; }
+}
+
+/* 能量波效果 */
+.energy-wave {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 2px solid var(--primary-color);
+    border-radius: 50%;
+    opacity: 0;
+    animation: energy-expand 2s ease-out infinite;
+}
+
+@keyframes energy-expand {
+    0% {
+        width: 0;
+        height: 0;
+        opacity: 0.8;
+    }
+    100% {
+        width: 400px;
+        height: 400px;
+        opacity: 0;
+    }
+}
+
+/* 星点背景 */
+.star-field {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: white;
+    border-radius: 50%;
+    animation: star-twinkle 3s ease-in-out infinite;
+}
+
+@keyframes star-twinkle {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+}
+
+/* 连接线 */
+.connection-line {
+    position: absolute;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+    transform-origin: left center;
+    opacity: 0.3;
+}
+
+/* 粒子爆发效果 */
+.burst-container {
+    position: absolute;
+    pointer-events: none;
+}
+
+.burst-particle {
+    position: absolute;
+    border-radius: 50%;
+    animation: burst 1s ease-out forwards;
+}
+
+@keyframes burst {
+    0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(var(--dx), var(--dy)) scale(0);
+        opacity: 0;
+    }
+}
+
+/* 漩涡效果 */
+.vortex-particle {
+    position: absolute;
+    border-radius: 50%;
+    animation: vortex-spin 3s linear infinite;
+}
+
+@keyframes vortex-spin {
+    from {
+        transform: rotate(0deg) translateX(var(--radius)) rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg) translateX(var(--radius)) rotate(-360deg);
+    }
+}
+
+/* 流动箭头 */
+.flow-arrow {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 10px solid var(--primary-color);
+    filter: drop-shadow(0 0 5px var(--primary-color));
+    animation: flow-move 2s linear infinite;
+}
+
+@keyframes flow-move {
+    0% { opacity: 0; transform: translateY(0); }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(100px); }
+}
+
+/* 霓虹边框效果 */
+.neon-border {
+    position: relative;
+}
+
+.neon-border::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color), var(--accent-color), var(--primary-color));
+    background-size: 400% 400%;
+    border-radius: inherit;
+    z-index: -1;
+    animation: neon-gradient 3s ease infinite;
+    filter: blur(5px);
+}
+
+@keyframes neon-gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* 数据流效果 */
+.data-stream {
+    position: absolute;
+    width: 2px;
+    background: linear-gradient(180deg, transparent, var(--primary-color), transparent);
+    animation: data-flow 1.5s linear infinite;
+}
+
+@keyframes data-flow {
+    0% { 
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% { 
+        transform: translateY(100%);
+        opacity: 0;
+    }
+}

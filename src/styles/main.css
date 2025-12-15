@@ -1,0 +1,493 @@
+/* CCBalance - 主样式文件 */
+
+/* CSS变量定义 */
+:root {
+    /* 主色调 */
+    --primary-color: #00d4ff;
+    --secondary-color: #ff00aa;
+    --accent-color: #7b2dff;
+    --success-color: #00ff88;
+    --warning-color: #ffaa00;
+    --danger-color: #ff4466;
+
+    /* 背景色 */
+    --bg-dark: #0a0a1a;
+    --bg-darker: #050510;
+    --bg-card: rgba(20, 20, 40, 0.8);
+    --bg-glass: rgba(255, 255, 255, 0.05);
+
+    /* 文字色 */
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.7);
+    --text-muted: rgba(255, 255, 255, 0.4);
+
+    /* 玻璃效果 */
+    --glass-bg: rgba(255, 255, 255, 0.08);
+    --glass-border: rgba(255, 255, 255, 0.15);
+    --glass-blur: 20px;
+
+    /* 阴影 */
+    --shadow-glow: 0 0 30px rgba(0, 212, 255, 0.3);
+    --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4);
+
+    /* 动画 */
+    --transition-fast: 0.15s ease-out;
+    --transition-normal: 0.3s ease-in-out;
+    --transition-slow: 0.5s ease-in-out;
+
+    /* 尺寸 */
+    --title-bar-height: 40px;
+    --border-radius: 12px;
+    --border-radius-sm: 8px;
+}
+
+/* 重置样式 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    user-select: none;
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* 标题栏 */
+.title-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--title-bar-height);
+    background: rgba(10, 10, 26, 0.95);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 9999;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.title-bar-drag {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding-left: 15px;
+    -webkit-app-region: drag;
+}
+
+.title-logo {
+    font-size: 18px;
+    color: var(--primary-color);
+    margin-right: 10px;
+    animation: pulse-glow 2s infinite;
+}
+
+.title-text {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.title-bar-controls {
+    display: flex;
+    height: 100%;
+    -webkit-app-region: no-drag;
+}
+
+.title-btn {
+    width: 46px;
+    height: 100%;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    font-size: 12px;
+}
+
+.title-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.title-btn-close:hover {
+    background: var(--danger-color);
+    color: white;
+}
+
+/* 背景粒子画布 */
+#bg-particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* 页面过渡动画（使用 page-* 前缀避免与 animations.css 冲突） */
+.screen {
+    display: none;
+}
+
+.screen.active {
+    display: flex;
+}
+
+.screen.page-enter-fade {
+    animation: pageFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.screen.page-leave-fade {
+    animation: pageFadeOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.screen.page-enter-slide-right {
+    animation: pageSlideInRight 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.screen.page-enter-slide-left {
+    animation: pageSlideInLeft 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.screen.page-leave-slide-left {
+    animation: pageSlideOutLeft 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.screen.page-leave-slide-right {
+    animation: pageSlideOutRight 0.3s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.screen.page-enter-scale {
+    animation: pageScaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.screen.page-leave-scale {
+    animation: pageScaleOut 0.3s ease both;
+}
+
+@keyframes pageFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes pageFadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes pageSlideInRight {
+    from { opacity: 0; transform: translateX(100px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pageSlideInLeft {
+    from { opacity: 0; transform: translateX(-100px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pageSlideOutLeft {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(-100px); }
+}
+
+@keyframes pageSlideOutRight {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(100px); }
+}
+
+@keyframes pageScaleIn {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pageScaleOut {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0; transform: scale(0.9); }
+}
+
+/* 主容器 */
+.main-container {
+    position: relative;
+    width: 100%;
+    height: calc(100% - var(--title-bar-height));
+    margin-top: var(--title-bar-height);
+    z-index: 1;
+}
+
+/* 屏幕容器 */
+.screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+}
+
+.screen.active {
+    display: flex;
+    opacity: 1;
+}
+
+/* 玻璃面板效果 */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--border-radius);
+}
+
+/* 主菜单 */
+#main-menu {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(ellipse at center, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
+}
+
+.menu-content {
+    text-align: center;
+    z-index: 10;
+}
+
+.game-title {
+    font-size: 72px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    letter-spacing: 4px;
+}
+
+.title-glow {
+    color: var(--primary-color);
+    text-shadow: 
+        0 0 10px var(--primary-color),
+        0 0 20px var(--primary-color),
+        0 0 40px var(--primary-color);
+    animation: text-glow 2s ease-in-out infinite alternate;
+}
+
+.title-balance {
+    color: var(--secondary-color);
+    text-shadow: 
+        0 0 10px var(--secondary-color),
+        0 0 20px var(--secondary-color);
+}
+
+.subtitle {
+    font-size: 18px;
+    color: var(--text-secondary);
+    letter-spacing: 8px;
+    margin-bottom: 50px;
+}
+
+.menu-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+}
+
+.menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 280px;
+    padding: 16px 30px;
+    border: 1px solid var(--glass-border);
+    border-radius: var(--border-radius);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+
+.menu-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: var(--transition-slow);
+}
+
+.menu-btn:hover::before {
+    left: 100%;
+}
+
+.menu-btn:hover {
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-glow);
+    transform: translateY(-2px);
+}
+
+.menu-btn.primary {
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    border: none;
+}
+
+.menu-btn.primary:hover {
+    box-shadow: 0 0 40px rgba(0, 212, 255, 0.5);
+}
+
+.menu-btn.secondary {
+    background: var(--glass-bg);
+}
+
+.menu-btn.danger {
+    border-color: var(--danger-color);
+    color: var(--danger-color);
+}
+
+.menu-btn.danger:hover {
+    background: var(--danger-color);
+    color: white;
+}
+
+.menu-btn i {
+    font-size: 18px;
+}
+
+.menu-info {
+    display: flex;
+    gap: 40px;
+    justify-content: center;
+    margin-top: 50px;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.info-item i {
+    color: var(--warning-color);
+}
+
+/* 返回按钮 */
+.back-btn {
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--glass-border);
+    border-radius: 50%;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: var(--transition-normal);
+}
+
+.back-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    box-shadow: var(--shadow-glow);
+}
+
+/* 屏幕头部 */
+.screen-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px 30px;
+    background: rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.screen-header h2 {
+    font-size: 24px;
+    font-weight: 600;
+}
+
+/* 动画关键帧 */
+@keyframes pulse-glow {
+    0%, 100% { 
+        filter: drop-shadow(0 0 5px var(--primary-color)); 
+    }
+    50% { 
+        filter: drop-shadow(0 0 15px var(--primary-color)); 
+    }
+}
+
+@keyframes text-glow {
+    from {
+        text-shadow: 
+            0 0 10px var(--primary-color),
+            0 0 20px var(--primary-color),
+            0 0 40px var(--primary-color);
+    }
+    to {
+        text-shadow: 
+            0 0 20px var(--primary-color),
+            0 0 40px var(--primary-color),
+            0 0 60px var(--primary-color);
+    }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* 波纹效果 */
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(0);
+    animation: ripple-effect 0.6s ease-out;
+    pointer-events: none;
+}
+
+@keyframes ripple-effect {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
