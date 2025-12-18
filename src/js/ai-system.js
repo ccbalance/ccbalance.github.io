@@ -175,6 +175,8 @@ const AISystem = {
         if (!level || !gameState) return null;
 
         const goal = gameState.goal || this.goal || 'reverse';
+        // 关键：卡牌收益评估与部分分析逻辑依赖 this.goal，必须与本次决策目标一致
+        this.setGoal?.(goal);
         const profile = this.getDifficultyProfile(difficulty);
 
         // 低难度：并非每次轮询都出手

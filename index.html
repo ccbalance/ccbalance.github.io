@@ -47,25 +47,30 @@
 
     <!-- 主容器 -->
     <div class="main-container">
-        <!-- 星级奖励面板 (悬浮于左上角) -->
-        <div class="star-progress-panel" id="star-progress-panel">
-            <div class="star-progress-compact" id="star-progress-compact">
-                <div class="star-count">
-                    <i class="fas fa-star"></i>
-                    <span id="star-count-display">0</span>
-                </div>
-                <div class="next-reward">
-                    <i class="fas fa-gift"></i>
-                    <span id="next-reward-text">下一奖励</span>
-                </div>
-                <div class="reward-badge" id="reward-badge" style="display: none;">
-                    <i class="fas fa-exclamation-circle"></i>
-                </div>
-            </div>
-        </div>
-
         <!-- 主菜单 -->
         <div id="main-menu" class="screen active">
+            <!-- 星级奖励面板（仅主菜单显示，跟随主菜单动画） -->
+            <div class="star-progress-panel" id="star-progress-panel">
+                <div class="star-progress-compact" id="star-progress-compact">
+                    <div class="star-count">
+                        <i class="fas fa-star"></i>
+                        <span id="star-count-display">0</span>
+                    </div>
+                    <div class="next-reward-group">
+                        <div class="next-reward">
+                            <i class="fas fa-gift"></i>
+                            <span id="next-reward-text">下一奖励</span>
+                        </div>
+                        <div class="next-reward-progress">
+                            <div class="next-reward-progress-fill" id="next-reward-progress-fill"></div>
+                        </div>
+                    </div>
+                    <div class="reward-badge" id="reward-badge" style="display: none;">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                </div>
+            </div>
+
             <div class="menu-content">
                 <h1 class="game-title">
                     <span class="title-glow">CC</span><span class="title-balance">Balance</span>
@@ -114,8 +119,12 @@
                 <button class="back-btn" id="btn-back-menu"><i class="fas fa-arrow-left"></i></button>
                 <h2>关卡选择</h2>
             </div>
-            
-            <div class="category-tabs">
+
+            <div class="category-tabs-wrap">
+                <button class="category-scroll-btn left" id="btn-category-scroll-left" aria-label="向左滚动" style="display:none;">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div class="category-tabs" id="category-tabs">
                 <button class="category-tab active" data-category="ionic">
                     <i class="fas fa-bolt"></i>
                     <span>离子反应</span>
@@ -143,6 +152,11 @@
                 <button class="category-tab" data-category="organic">
                     <i class="fas fa-flask"></i>
                     <span>有机反应</span>
+                </button>
+
+                </div>
+                <button class="category-scroll-btn right" id="btn-category-scroll-right" aria-label="向右滚动" style="display:none;">
+                    <i class="fas fa-chevron-right"></i>
                 </button>
             </div>
 
@@ -639,6 +653,10 @@
                         <div class="hotkey-item"><span>打开终端</span><kbd>T</kbd></div>
                     </div>
                 </div>
+                <button class="menu-btn" id="btn-reset-star-road">
+                    <i class="fas fa-undo-alt"></i>
+                    <span>重置摘星之路状态</span>
+                </button>
                 <button class="menu-btn danger" id="btn-reset-progress">
                     <i class="fas fa-trash"></i>
                     <span>重置游戏进度</span>
@@ -681,15 +699,15 @@
     <!-- 摘星之路 (星级奖励界面) -->
     <div id="star-rewards-screen" class="modal-overlay" style="display: none;">
         <div class="modal-content star-rewards-modal">
-            <button class="modal-close" id="star-rewards-close">
-                <i class="fas fa-times"></i>
-            </button>
             <div class="star-rewards-header">
                 <h2><i class="fas fa-star"></i> 摘星之路</h2>
                 <div class="star-rewards-current">
                     <span>当前星数：</span>
                     <strong id="star-rewards-count">0</strong>
                 </div>
+                <button class="modal-close" id="star-rewards-close" aria-label="关闭摘星之路">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             <div class="star-rewards-timeline" id="star-rewards-timeline">
                 <!-- Timeline will be generated dynamically -->

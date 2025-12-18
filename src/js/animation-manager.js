@@ -4,6 +4,9 @@
 
 const AnimationManager = {
     animations: new Map(),
+
+    // 点击爆发色板（可被 App.applyParticleSkin 注入）
+    burstPalette: null,
     
     /**
      * 初始化动画管理器
@@ -325,7 +328,9 @@ const AnimationManager = {
         `;
         layer.appendChild(burst);
 
-        const colors = ['var(--primary-color)', 'var(--secondary-color)', 'var(--accent-color)', 'var(--success-color)'];
+        const colors = this.burstPalette && this.burstPalette.length
+            ? this.burstPalette
+            : ['var(--primary-color)', 'var(--secondary-color)', 'var(--accent-color)', 'var(--success-color)'];
         const count = 28;
 
         for (let i = 0; i < count; i++) {
@@ -374,6 +379,17 @@ const AnimationManager = {
         }, 60);
 
         setTimeout(() => burst.remove(), 1100);
+    },
+
+    /**
+     * 设置点击爆发的色板（数组）
+     */
+    setBurstPalette(colors = []) {
+        if (Array.isArray(colors) && colors.length) {
+            this.burstPalette = colors;
+        } else {
+            this.burstPalette = null;
+        }
     },
 
     /**

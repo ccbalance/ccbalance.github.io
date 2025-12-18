@@ -100,6 +100,17 @@ const ChemistryEngine = {
         const MIN_K = 1e-300;
         const MAX_K = 1e300;
 
+        const normalizeDeltaH = (raw) => {
+            const value = Number(raw);
+            if (!Number.isFinite(value) || value === 0) return 0;
+
+            // 约定：编辑器/内置关卡使用 kJ/mol。
+            // 但自定义关卡/外部数据常会误用 J/mol：例如 -50000 表示 -50 kJ/mol。
+            // 若绝对值过大，按 J/mol 兜底换算为 kJ/mol。
+            if (Math.abs(value) > 2000) return value / 1000;
+            return value;
+        };
+
         // 如果传入level对象和温度
         if (typeof levelOrTemp === 'object' && temperature !== undefined) {
             const level = levelOrTemp;
@@ -108,7 +119,7 @@ const ChemistryEngine = {
                 : 1;
             const T0 = level.initialTemp || 298;
             const T = temperature;
-            const dH = level.deltaH || 0;
+            const dH = normalizeDeltaH(level.deltaH);
 
             const sensitivity = Number.isFinite(level.temperatureSensitivity)
                 ? level.temperatureSensitivity
@@ -135,7 +146,7 @@ const ChemistryEngine = {
             : 1;
         const T0 = initialTemp || 298;
         const T = temperature;
-        const dH = deltaH || 0; // kJ/mol
+        const dH = normalizeDeltaH(deltaH); // kJ/mol
         
         // ln(K2/K1) = -ΔH/R * (1/T2 - 1/T1)
         const sensitivity = Number.isFinite(this.currentReaction.temperatureSensitivity)

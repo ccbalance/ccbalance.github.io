@@ -14,6 +14,15 @@ const AppConfig = {
 const App = {
     // 背景粒子系统实例
     bgParticles: null,
+
+    // 当前粒子皮肤色板（供点击爆发/背景使用）
+    skinPalettes: {
+        colorful: ['#00d4ff', '#7b2dff', '#00ff88', '#ff00aa', '#ff4466', '#ffaa00'],
+        green: ['#00ff66', '#22ff88', '#44ffaa', '#88ffcc', '#66ffaa'],
+        bronze: ['#cd7f32', '#d4a574', '#b87333', '#e6a857', '#cc9966'],
+        silver: ['#c0c0c0', '#d3d3d3', '#e8e8e8', '#f0f0f0', '#cccccc'],
+        gold: ['#ffd700', '#ffdf00', '#ffea00', '#fff8dc', '#ffe55c']
+    },
     
     // 初始化状态
     initialized: false,
@@ -248,6 +257,9 @@ const App = {
         const counts = { low: 50, medium: 200, high: 500 };
         this.bgParticles.setColor?.(settings.particleColor || '#00d4ff');
         this.bgParticles.init(counts[settings.particleCount] || 200);
+
+        // 同步粒子皮肤（包括背景/点击爆发/游戏内粒子）
+        this.applyParticleSkin(settings.particleSkin || 'colorful', { skipSave: true });
         
         // 启动动画循环
         this.bgParticles.start();
@@ -304,6 +316,36 @@ const App = {
             this.bgParticles.setColor?.(settings.particleColor || '#00d4ff');
             this.bgParticles.init(counts[settings.particleCount] || 200);
         }
+
+        // 应用粒子皮肤（背景 + 点击爆发 + 游戏内）
+        this.applyParticleSkin(settings.particleSkin || 'colorful', { skipSave: true });
+    },
+
+    /**
+     * 统一应用粒子皮肤（背景点击爆发 + 游戏内粒子系统）
+     * @param {string} skinId - colorful/green/bronze/silver/gold
+     * @param {object} opts - { skipSave: boolean }
+     */
+    applyParticleSkin(skinId = 'colorful', opts = {}) {
+        const unlocked = StorageManager.getUnlockedSkins();
+        const safeSkin = (skinId === 'colorful' || unlocked.includes(skinId)) ? skinId : 'colorful';
+
+        // 持久化（除非明确跳过）
+        if (!opts.skipSave) {
+            StorageManager.saveSettings({ particleSkin: safeSkin });
+        }
+
+        const palette = this.skinPalettes[safeSkin] || this.skinPalettes.colorful;
+
+        // 点击爆发色板（背景颜色保持用户自定义）
+        AnimationManager?.setBurstPalette?.(palette);
+
+        // 游戏粒子系统（若已初始化）
+        if (Game?.particleSystem?.setSkin) {
+            Game.particleSystem.setSkin(safeSkin);
+        }
+
+        return safeSkin;
     },
 
     /**

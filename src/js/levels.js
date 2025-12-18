@@ -2468,9 +2468,86 @@ const LevelData = {
     ],
 
     /**
+     * 为所有关卡兜底补齐诗意短句
+     * - 不覆盖已手写的 poeticDescription
+     * - 保持确定性（同一关卡每次生成一致）
+     */
+    ensurePoeticDescriptions() {
+        if (this._poeticReady) return;
+        this._poeticReady = true;
+
+        const pools = {
+            ionic: [
+                '离子相逢，电荷牵引，沉淀如雪落杯底。',
+                '一滴试剂，万千微粒，悄悄排出秩序。',
+                '酸与碱握手言和，水在掌心轻声成形。'
+            ],
+            redox: [
+                '得失之间皆是交换，电子奔走如流星。',
+                '氧化与还原相对而行，像两条交错的河。',
+                '电位起伏，胜负未定，平衡只差一念。'
+            ],
+            dissolution: [
+                '溶与沉是一枚硬币的两面，静水里有暗潮。',
+                '晶格松动，离子游走，杯中也有山河。',
+                '饱和边缘最动人：刚好不多，恰好不少。'
+            ],
+            ionization: [
+                '弱者不弱，慢慢电离，时间替它说话。',
+                '水解如回声，在溶液深处反复轻响。',
+                '酸碱不争高下，只争那一点点倾向。'
+            ],
+            complex: [
+                '多重平衡叠成迷宫，出口总在下一步。',
+                '络合与解离来回试探，像星群围绕引力。',
+                '系统不喧哗，变量在暗处互相照亮。'
+            ],
+            electrochemistry: [
+                '电流写下方向，反应把它读成命运。',
+                '阴阳两极相望，离子在路上完成誓言。',
+                '一端失去，一端得到，回路便有了光。'
+            ],
+            organic: [
+                '碳链转身，官能团低语，万物皆可相逢。',
+                '取代与加成像舞步，反应热是鼓点。',
+                '有机的温柔在于选择：留下什么，带走什么。'
+            ],
+            custom: [
+                '你写下的方程式，会在这里开花结果。',
+                '创意不是偏离，而是另一种平衡。'
+            ]
+        };
+
+        const defaultPool = [
+            '平衡不是停滞，是两股力量相互成全。',
+            '变化在继续，答案在途中。',
+            '看似静止的刻度里，藏着最剧烈的往返。'
+        ];
+
+        const pick = (arr, seed) => arr[seed % arr.length];
+        const safeStr = (v) => (typeof v === 'string' ? v.trim() : '');
+
+        for (const level of this.levels) {
+            if (!level) continue;
+            const existing = safeStr(level.poeticDescription);
+            if (existing) continue;
+
+            const category = level.category;
+            const pool = pools[category] || defaultPool;
+            const seed = Number.isFinite(level.id) ? level.id : Math.abs(String(level.name || '').length);
+            const base = pick(pool, seed);
+
+            // 轻量“点题”：若有关卡名就拼接一句
+            const name = safeStr(level.name);
+            level.poeticDescription = name ? `${name}：${base}` : base;
+        }
+    },
+
+    /**
      * 获取分类下的关卡
      */
     getLevelsByCategory(category) {
+        this.ensurePoeticDescriptions();
         return this.levels.filter(level => level.category === category);
     },
 
@@ -2478,6 +2555,7 @@ const LevelData = {
      * 获取指定关卡
      */
     getLevel(id) {
+        this.ensurePoeticDescriptions();
         return this.levels.find(level => level.id === id);
     },
 

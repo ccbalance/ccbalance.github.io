@@ -120,7 +120,18 @@ const StorageManager = {
      */
     saveSettings(settings) {
         const currentSettings = this.getSettings();
-        return this.set(this.KEYS.SETTINGS, { ...currentSettings, ...settings });
+        const nextSettings = { ...currentSettings, ...settings };
+
+        // 强校验：未解锁的粒子皮肤不允许被保存/应用
+        if (Object.prototype.hasOwnProperty.call(nextSettings, 'particleSkin')) {
+            const requested = String(nextSettings.particleSkin || '').trim() || 'colorful';
+            const unlocked = this.getUnlockedSkins();
+            nextSettings.particleSkin = (requested === 'colorful' || unlocked.includes(requested))
+                ? requested
+                : 'colorful';
+        }
+
+        return this.set(this.KEYS.SETTINGS, nextSettings);
     },
 
     /**
@@ -376,6 +387,24 @@ const StorageManager = {
         progress.unlockedSkins = ['colorful', 'green', 'bronze', 'silver', 'gold'];
         progress.claimedRewards = ['reward-3', 'reward-20', 'reward-50', 'reward-90'];
         this.set(this.KEYS.GAME_PROGRESS, progress);
+        return true;
+    },
+
+    /**
+     * 锁回所有皮肤（调试用）
+     */
+    lockAllSkins() {
+        const progress = this.getProgress();
+        progress.unlockedSkins = ['colorful'];
+        progress.claimedRewards = [];
+        this.set(this.KEYS.GAME_PROGRESS, progress);
+
+        // 如果当前设置选了被锁的皮肤，强制回退
+        const settings = this.getSettings();
+        if (settings.particleSkin && settings.particleSkin !== 'colorful') {
+            this.saveSettings({ particleSkin: 'colorful' });
+        }
+
         return true;
     }
 };

@@ -115,6 +115,9 @@ const Game = {
         // 随机分配目标
         this.assignGoals();
 
+        // 与普通关卡保持一致：能力卡/AI分析依赖 AISystem.goal
+        AISystem.setGoal?.(this.state.aiGoal);
+
         // 关键：能力卡（如热交换）会读取 AISystem.goal，必须与 aiGoal 同步
         AISystem.setGoal?.(this.state.aiGoal);
 
@@ -193,6 +196,7 @@ const Game = {
         this.initParticleSystem();
 
         AISystem.init(level);
+        AISystem.setGoal?.(this.state.aiGoal);
         AudioManager?.playInGameBgm?.({ fadeMs: 800 });
         CardSystem.reset();
         KeyboardHandler.reset();

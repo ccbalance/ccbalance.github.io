@@ -208,7 +208,26 @@ const Terminal = {
             execute: function() {
                 StorageManager.unlockAllSkins();
                 UIManager?.updateStarProgress?.();
+                UIManager?.refreshParticleSkinOptions?.();
+                const skin = StorageManager.getSettings()?.particleSkin || 'colorful';
+                App?.applyParticleSkin?.(skin, { skipSave: true });
                 return '已解锁所有皮肤！\n- 绿色粒子效果\n- 铜色粒子效果\n- 银色粒子效果\n- 金色粒子效果';
+            }
+        },
+
+        'lock-all-skin': {
+            desc: '锁回所有皮肤（调试用）',
+            usage: 'lock-all-skin',
+            execute: function() {
+                StorageManager.lockAllSkins?.();
+                UIManager?.updateStarProgress?.();
+                UIManager?.refreshParticleSkinOptions?.();
+
+                // 如果游戏粒子系统已经初始化，也同步回退
+                const skin = StorageManager.getSettings()?.particleSkin || 'colorful';
+                App?.applyParticleSkin?.(skin, { skipSave: true });
+
+                return '已锁回所有皮肤（仅保留：彩色默认）。';
             }
         },
         
