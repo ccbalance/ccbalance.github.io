@@ -413,6 +413,42 @@
             <div class="collection-grid" id="collection-grid"></div>
         </div>
 
+        <!-- 方程式详情模态框 -->
+        <div id="equation-modal" class="modal-overlay" style="display: none;">
+            <div class="modal-content equation-detail-card">
+                <button class="modal-close" id="equation-modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="equation-detail-header">
+                    <div class="equation-detail-category">
+                        <i class="fas fa-flask"></i>
+                        <span id="equation-detail-category-name"></span>
+                    </div>
+                    <h3 id="equation-detail-name"></h3>
+                </div>
+                <div class="equation-detail-equation" id="equation-detail-equation"></div>
+                <div class="equation-detail-description" id="equation-detail-description"></div>
+                <div class="equation-detail-poetic">
+                    <i class="fas fa-feather-alt"></i>
+                    <p id="equation-detail-poetic-text"></p>
+                </div>
+                <div class="equation-detail-info">
+                    <div class="info-item">
+                        <span class="info-label"><i class="fas fa-thermometer-half"></i> 焓变</span>
+                        <span id="equation-detail-enthalpy"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label"><i class="fas fa-balance-scale"></i> 平衡常数</span>
+                        <span id="equation-detail-k"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label"><i class="fas fa-star"></i> 难度</span>
+                        <span id="equation-detail-difficulty"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- 创意工坊界面 -->
         <div id="workshop-screen" class="screen">
             <div class="screen-header">

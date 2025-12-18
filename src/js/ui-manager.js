@@ -733,8 +733,62 @@ const UIManager = {
                 </div>
             `;
 
+            // Add click handler to show equation details for unlocked levels
+            if (isUnlocked) {
+                card.style.cursor = 'pointer';
+                card.addEventListener('click', () => {
+                    this.showEquationDetail(level);
+                });
+            }
+
             container.appendChild(card);
         }
+    },
+
+    /**
+     * Show equation detail modal
+     */
+    showEquationDetail(level) {
+        const modal = document.getElementById('equation-modal');
+        if (!modal) return;
+
+        const categoryInfo = LevelData.categories[level.category];
+        
+        // Fill modal content
+        document.getElementById('equation-detail-category-name').textContent = categoryInfo.name;
+        document.querySelector('#equation-modal .equation-detail-category i').className = `fas ${categoryInfo.icon}`;
+        document.getElementById('equation-detail-name').textContent = level.name;
+        document.getElementById('equation-detail-equation').innerHTML = level.displayEquation;
+        document.getElementById('equation-detail-description').textContent = level.description;
+        document.getElementById('equation-detail-poetic-text').textContent = level.poeticDescription || '暂无诗意描述';
+        
+        // Fill info
+        const deltaH = level.deltaH || 0;
+        document.getElementById('equation-detail-enthalpy').textContent = 
+            deltaH > 0 ? `+${deltaH} kJ/mol (吸热)` : `${deltaH} kJ/mol (放热)`;
+        
+        const k = level.equilibriumConstant;
+        const kStr = k >= 1000 || k <= 0.001 ? k.toExponential(2) : k.toFixed(3);
+        document.getElementById('equation-detail-k').textContent = kStr;
+        
+        const difficultyMap = { 1: '简单', 2: '中等', 3: '困难', 4: '专家' };
+        document.getElementById('equation-detail-difficulty').textContent = difficultyMap[level.difficulty] || '中等';
+        
+        // Show modal
+        modal.style.display = 'flex';
+        
+        // Add close handlers
+        const closeBtn = document.getElementById('equation-modal-close');
+        const closeHandler = () => {
+            modal.style.display = 'none';
+        };
+        
+        closeBtn.onclick = closeHandler;
+        modal.onclick = (e) => {
+            if (e.target === modal) {
+                closeHandler();
+            }
+        };
     },
 
     /**
