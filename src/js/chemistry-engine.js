@@ -114,10 +114,14 @@ const ChemistryEngine = {
                 ? level.temperatureSensitivity
                 : 1;
 
-            const lnRatio = (-(dH * 1000) / this.R * (1/T - 1/T0)) * sensitivity;
+            // Calculate ln ratio and apply sensitivity, then clamp to prevent overflow
+            let lnRatio = (-(dH * 1000) / this.R * (1/T - 1/T0)) * sensitivity;
+            // Clamp lnRatio to reasonable range to prevent K from becoming extreme values
+            const MAX_LN_RATIO = 690; // exp(690) ≈ 1e300
+            lnRatio = Math.max(-MAX_LN_RATIO, Math.min(MAX_LN_RATIO, lnRatio));
+            
             let K = K0 * Math.exp(lnRatio);
-            if (!Number.isFinite(K)) K = lnRatio > 0 ? MAX_K : MIN_K;
-            if (K <= 0) K = MIN_K;
+            if (!Number.isFinite(K) || K <= 0) K = lnRatio > 0 ? MAX_K : MIN_K;
             return Utils?.clamp ? Utils.clamp(K, MIN_K, MAX_K) : Math.min(MAX_K, Math.max(MIN_K, K));
         }
         
@@ -138,10 +142,14 @@ const ChemistryEngine = {
             ? this.currentReaction.temperatureSensitivity
             : 1;
 
-        const lnRatio = (-(dH * 1000) / this.R * (1/temp - 1/T0)) * sensitivity;
+        // Calculate ln ratio and apply sensitivity, then clamp to prevent overflow
+        let lnRatio = (-(dH * 1000) / this.R * (1/temp - 1/T0)) * sensitivity;
+        // Clamp lnRatio to reasonable range to prevent K from becoming extreme values
+        const MAX_LN_RATIO = 690; // exp(690) ≈ 1e300
+        lnRatio = Math.max(-MAX_LN_RATIO, Math.min(MAX_LN_RATIO, lnRatio));
+        
         let K = K0 * Math.exp(lnRatio);
-        if (!Number.isFinite(K)) K = lnRatio > 0 ? MAX_K : MIN_K;
-        if (K <= 0) K = MIN_K;
+        if (!Number.isFinite(K) || K <= 0) K = lnRatio > 0 ? MAX_K : MIN_K;
         return Utils?.clamp ? Utils.clamp(K, MIN_K, MAX_K) : Math.min(MAX_K, Math.max(MIN_K, K));
     },
 

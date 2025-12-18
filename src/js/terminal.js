@@ -202,6 +202,16 @@ const Terminal = {
             }
         },
         
+        'unlock-all-skin': {
+            desc: '解锁所有皮肤（调试用）',
+            usage: 'unlock-all-skin',
+            execute: function() {
+                StorageManager.unlockAllSkins();
+                UIManager?.updateStarProgress?.();
+                return '已解锁所有皮肤！\n- 绿色粒子效果\n- 铜色粒子效果\n- 银色粒子效果\n- 金色粒子效果';
+            }
+        },
+        
         version: {
             desc: '显示版本信息',
             usage: 'version',
