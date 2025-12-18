@@ -21,7 +21,8 @@ const StorageManager = {
         turnTime: 30,
         showHints: true,
         roundsPerLevel: 10,
-        particleColor: '#00d4ff'
+        particleColor: '#00d4ff',
+        particleSkin: 'colorful'
     },
 
     /**
@@ -32,7 +33,9 @@ const StorageManager = {
         unlockedLevels: [1],
         completedLevels: {},
         totalStars: 0,
-        titles: []
+        titles: [],
+        unlockedSkins: ['colorful'],
+        claimedRewards: []
     },
 
     /**
@@ -311,6 +314,69 @@ const StorageManager = {
     getTotalStars() {
         const progress = this.getProgress();
         return progress.totalStars;
+    },
+
+    /**
+     * 获取已解锁的皮肤列表
+     */
+    getUnlockedSkins() {
+        const progress = this.getProgress();
+        return progress.unlockedSkins || ['colorful'];
+    },
+
+    /**
+     * 解锁皮肤
+     */
+    unlockSkin(skinId) {
+        const progress = this.getProgress();
+        if (!progress.unlockedSkins) progress.unlockedSkins = ['colorful'];
+        if (!progress.unlockedSkins.includes(skinId)) {
+            progress.unlockedSkins.push(skinId);
+            this.set(this.KEYS.GAME_PROGRESS, progress);
+            return true;
+        }
+        return false;
+    },
+
+    /**
+     * 检查皮肤是否已解锁
+     */
+    isSkinUnlocked(skinId) {
+        const unlockedSkins = this.getUnlockedSkins();
+        return unlockedSkins.includes(skinId);
+    },
+
+    /**
+     * 获取已领取的奖励列表
+     */
+    getClaimedRewards() {
+        const progress = this.getProgress();
+        return progress.claimedRewards || [];
+    },
+
+    /**
+     * 标记奖励为已领取
+     */
+    claimReward(rewardId) {
+        const progress = this.getProgress();
+        if (!progress.claimedRewards) progress.claimedRewards = [];
+        if (!progress.claimedRewards.includes(rewardId)) {
+            progress.claimedRewards.push(rewardId);
+            this.set(this.KEYS.GAME_PROGRESS, progress);
+            return true;
+        }
+        return false;
+    },
+
+    /**
+     * 解锁所有皮肤（调试用）
+     */
+    unlockAllSkins() {
+        const progress = this.getProgress();
+        progress.unlockedSkins = ['colorful', 'green', 'bronze', 'silver', 'gold'];
+        progress.claimedRewards = ['reward-3', 'reward-20', 'reward-50', 'reward-90'];
+        this.set(this.KEYS.GAME_PROGRESS, progress);
+        return true;
     }
 };
 

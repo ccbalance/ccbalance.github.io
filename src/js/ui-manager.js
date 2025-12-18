@@ -17,6 +17,7 @@ const UIManager = {
         this.cacheElements();
         this.bindEvents();
         this.updateProgress();
+        this.updateStarProgress();
         this.renderAboutCard();
 
         // 编辑器窗口保存回传（Electron）
@@ -283,6 +284,16 @@ const UIManager = {
             });
         });
 
+        // 星级进度面板点击事件
+        document.getElementById('star-progress-compact')?.addEventListener('click', () => {
+            this.showStarRewards();
+        });
+
+        // 星级奖励屏幕关闭事件
+        document.getElementById('star-rewards-close')?.addEventListener('click', () => {
+            document.getElementById('star-rewards-screen').style.display = 'none';
+        });
+
         // 创意工坊事件
         this.bindWorkshopEvents();
 
@@ -354,6 +365,33 @@ const UIManager = {
                 const value = String(e.target.value || '').trim() || '#00d4ff';
                 StorageManager.saveSettings({ particleColor: value });
                 window.bgParticles?.setColor?.(value);
+            });
+        }
+
+        // 粒子皮肤
+        const particleSkin = document.getElementById('particle-skin');
+        if (particleSkin) {
+            particleSkin.value = settings.particleSkin || 'colorful';
+            
+            // 根据解锁状态禁用选项
+            const unlockedSkins = StorageManager.getUnlockedSkins();
+            Array.from(particleSkin.options).forEach(option => {
+                const skinId = option.value;
+                if (skinId !== 'colorful' && !unlockedSkins.includes(skinId)) {
+                    option.disabled = true;
+                }
+            });
+            
+            particleSkin.addEventListener('change', (e) => {
+                const skinId = e.target.value;
+                if (unlockedSkins.includes(skinId) || skinId === 'colorful') {
+                    StorageManager.saveSettings({ particleSkin: skinId });
+                    // 这里可以添加粒子效果切换逻辑
+                    Utils.showToast(`已切换到${e.target.options[e.target.selectedIndex].text}`, 'success');
+                } else {
+                    e.target.value = settings.particleSkin || 'colorful';
+                    Utils.showToast('该皮肤尚未解锁', 'error');
+                }
             });
         }
 
@@ -1499,6 +1537,138 @@ const UIManager = {
             this.showMessage('下载失败: ' + error.message, 'error');
             console.error('Download failed:', error);
         }
+    },
+
+    /**
+     * 更新星级进度面板
+     */
+    updateStarProgress() {
+        const totalStars = StorageManager.getTotalStars();
+        const starCountDisplay = document.getElementById('star-count-display');
+        const nextRewardText = document.getElementById('next-reward-text');
+        const rewardBadge = document.getElementById('reward-badge');
+        
+        if (starCountDisplay) {
+            starCountDisplay.textContent = totalStars;
+        }
+        
+        // 定义奖励阈值
+        const rewards = [
+            { stars: 3, name: '绿色粒子' },
+            { stars: 20, name: '铜色粒子' },
+            { stars: 50, name: '银色粒子' },
+            { stars: 90, name: '金色粒子' }
+        ];
+        
+        // 找到下一个未达到的奖励
+        let nextReward = null;
+        for (const reward of rewards) {
+            if (totalStars < reward.stars) {
+                nextReward = reward;
+                break;
+            }
+        }
+        
+        if (nextReward && nextRewardText) {
+            const starsNeeded = nextReward.stars - totalStars;
+            nextRewardText.textContent = `${starsNeeded}★ → ${nextReward.name}`;
+        } else if (nextRewardText) {
+            nextRewardText.textContent = '已达成所有奖励';
+        }
+        
+        // 检查是否有可领取的奖励
+        const claimedRewards = StorageManager.getClaimedRewards();
+        let hasClaimable = false;
+        for (const reward of rewards) {
+            const rewardId = `reward-${reward.stars}`;
+            if (totalStars >= reward.stars && !claimedRewards.includes(rewardId)) {
+                hasClaimable = true;
+                break;
+            }
+        }
+        
+        if (rewardBadge) {
+            rewardBadge.style.display = hasClaimable ? 'flex' : 'none';
+        }
+    },
+
+    /**
+     * 显示星级奖励界面
+     */
+    showStarRewards() {
+        const screen = document.getElementById('star-rewards-screen');
+        const timeline = document.getElementById('star-rewards-timeline');
+        const countDisplay = document.getElementById('star-rewards-count');
+        
+        if (!screen || !timeline) return;
+        
+        const totalStars = StorageManager.getTotalStars();
+        const claimedRewards = StorageManager.getClaimedRewards();
+        const unlockedSkins = StorageManager.getUnlockedSkins();
+        
+        if (countDisplay) {
+            countDisplay.textContent = totalStars;
+        }
+        
+        // 定义奖励
+        const rewards = [
+            { stars: 3, name: '绿色粒子效果', icon: 'fa-circle', skin: 'green' },
+            { stars: 20, name: '铜色粒子效果', icon: 'fa-circle', skin: 'bronze' },
+            { stars: 50, name: '银色粒子效果', icon: 'fa-circle', skin: 'silver' },
+            { stars: 90, name: '金色粒子效果', icon: 'fa-circle', skin: 'gold' }
+        ];
+        
+        // 生成时间轴
+        timeline.innerHTML = '';
+        rewards.forEach(reward => {
+            const rewardId = `reward-${reward.stars}`;
+            const isUnlocked = unlockedSkins.includes(reward.skin);
+            const isClaimable = totalStars >= reward.stars && !claimedRewards.includes(rewardId);
+            const isLocked = totalStars < reward.stars;
+            
+            let statusClass = 'locked';
+            let statusText = '未达成';
+            if (isClaimable) {
+                statusClass = 'claimable';
+                statusText = '可领取';
+            } else if (isUnlocked) {
+                statusClass = 'unlocked';
+                statusText = '已解锁';
+            }
+            
+            const milestone = document.createElement('div');
+            milestone.className = `reward-milestone ${statusClass}`;
+            milestone.innerHTML = `
+                <div class="reward-icon-container">
+                    <i class="fas ${reward.icon}"></i>
+                </div>
+                <div class="reward-info">
+                    <div class="reward-stars">
+                        <i class="fas fa-star"></i>
+                        <span>${reward.stars}</span>
+                    </div>
+                    <div class="reward-name">${reward.name}</div>
+                    <div class="reward-status ${statusClass}">${statusText}</div>
+                </div>
+            `;
+            
+            // 点击领取奖励
+            if (isClaimable) {
+                milestone.style.cursor = 'pointer';
+                milestone.addEventListener('click', () => {
+                    StorageManager.claimReward(rewardId);
+                    StorageManager.unlockSkin(reward.skin);
+                    this.showStarRewards(); // 刷新界面
+                    this.updateStarProgress();
+                    Utils.showToast(`已解锁 ${reward.name}！`, 'success');
+                });
+            }
+            
+            timeline.appendChild(milestone);
+        });
+        
+        // 显示界面
+        screen.style.display = 'flex';
     }
 };
 

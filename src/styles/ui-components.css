@@ -1110,3 +1110,276 @@ kbd {
         opacity: 1;
     }
 }
+
+/* 星级奖励面板 (左上角悬浮) */
+.star-progress-panel {
+    position: fixed;
+    top: 50px;
+    left: 20px;
+    z-index: 900;
+    pointer-events: auto;
+}
+
+.star-progress-compact {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 18px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.star-progress-compact:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
+    border-color: var(--primary-color);
+}
+
+.star-progress-compact .star-count {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.star-progress-compact .star-count i {
+    font-size: 20px;
+    color: #ffd700;
+}
+
+.star-progress-compact .next-reward {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.star-progress-compact .next-reward i {
+    color: var(--secondary-color);
+}
+
+.star-progress-compact .reward-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: var(--danger-color);
+    border-radius: 50%;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.star-progress-compact .reward-badge i {
+    font-size: 14px;
+    color: white;
+}
+
+/* 摘星之路模态框 */
+.star-rewards-modal {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--border-radius-lg);
+    padding: 0;
+    max-width: 900px;
+    width: 95%;
+    max-height: 85vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.star-rewards-header {
+    padding: 25px 30px;
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(123, 45, 255, 0.1));
+    border-bottom: 1px solid var(--glass-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.star-rewards-header h2 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 26px;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.star-rewards-header h2 i {
+    color: #ffd700;
+}
+
+.star-rewards-current {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    color: var(--text-secondary);
+}
+
+.star-rewards-current strong {
+    font-size: 24px;
+    color: #ffd700;
+}
+
+.star-rewards-timeline {
+    flex: 1;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 40px 30px;
+    display: flex;
+    gap: 60px;
+    align-items: center;
+}
+
+.reward-milestone {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    min-width: 140px;
+    position: relative;
+}
+
+.reward-milestone::after {
+    content: '';
+    position: absolute;
+    top: 50px;
+    left: 100%;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(to right, var(--glass-border), transparent);
+}
+
+.reward-milestone:last-child::after {
+    display: none;
+}
+
+.reward-icon-container {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid var(--glass-border);
+    background: var(--glass-bg);
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.reward-milestone.unlocked .reward-icon-container {
+    border-color: var(--primary-color);
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(123, 45, 255, 0.2));
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+}
+
+.reward-milestone.claimable .reward-icon-container {
+    border-color: #ffd700;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(255, 165, 0, 0.3));
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.reward-icon-container i {
+    font-size: 40px;
+    color: var(--text-secondary);
+}
+
+.reward-milestone.unlocked .reward-icon-container i,
+.reward-milestone.claimable .reward-icon-container i {
+    color: var(--text-primary);
+}
+
+.reward-info {
+    text-align: center;
+}
+
+.reward-stars {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.reward-stars i {
+    color: #ffd700;
+}
+
+.reward-name {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.reward-milestone.unlocked .reward-name {
+    color: var(--primary-color);
+}
+
+.reward-status {
+    margin-top: 8px;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.reward-status.locked {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-secondary);
+}
+
+.reward-status.unlocked {
+    background: rgba(0, 212, 255, 0.2);
+    color: var(--primary-color);
+}
+
+.reward-status.claimable {
+    background: rgba(255, 215, 0, 0.3);
+    color: #ffd700;
+}
+
+.star-rewards-footer {
+    padding: 20px 30px;
+    background: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid var(--glass-border);
+    text-align: center;
+}
+
+.star-rewards-footer p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.star-rewards-footer i {
+    color: var(--primary-color);
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.9;
+    }
+}
