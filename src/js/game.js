@@ -760,6 +760,12 @@ const Game = {
         
         this.particleSystem = new ParticleSystem(canvas);
         
+        // 应用保存的粒子皮肤
+        const settings = StorageManager.getSettings();
+        if (settings.particleSkin) {
+            this.particleSystem.setSkin(settings.particleSkin);
+        }
+        
         // 创建初始反应物和产物流
         if (this.state.levelData) {
             const reactants = this.state.levelData.reactants || [];

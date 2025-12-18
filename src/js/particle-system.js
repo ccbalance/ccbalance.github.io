@@ -8,6 +8,7 @@ class ParticleSystem {
         this.ctx = canvas.getContext('2d');
         this.particles = [];
         this.running = false;
+        this.currentSkin = 'colorful';
         this.settings = {
             maxParticles: 200,
             particleSize: { min: 2, max: 6 },
@@ -19,8 +20,47 @@ class ParticleSystem {
             }
         };
         
+        // 定义不同皮肤的颜色方案
+        this.skinColors = {
+            colorful: {
+                reactant: ['#00d4ff', '#7b2dff', '#00ff88'],
+                product: ['#ff00aa', '#ff4466', '#ffaa00'],
+                neutral: ['#ffffff', '#aaaaaa']
+            },
+            green: {
+                reactant: ['#00ff66', '#22ff88', '#44ffaa'],
+                product: ['#00ff66', '#22ff88', '#44ffaa'],
+                neutral: ['#88ffcc', '#66ffaa']
+            },
+            bronze: {
+                reactant: ['#cd7f32', '#d4a574', '#b87333'],
+                product: ['#cd7f32', '#d4a574', '#b87333'],
+                neutral: ['#e6a857', '#cc9966']
+            },
+            silver: {
+                reactant: ['#c0c0c0', '#d3d3d3', '#e8e8e8'],
+                product: ['#c0c0c0', '#d3d3d3', '#e8e8e8'],
+                neutral: ['#f0f0f0', '#cccccc']
+            },
+            gold: {
+                reactant: ['#ffd700', '#ffdf00', '#ffea00'],
+                product: ['#ffd700', '#ffdf00', '#ffea00'],
+                neutral: ['#fff8dc', '#ffe55c']
+            }
+        };
+        
         this.resize();
         window.addEventListener('resize', () => this.resize());
+    }
+
+    /**
+     * 设置粒子皮肤
+     */
+    setSkin(skinId) {
+        if (this.skinColors[skinId]) {
+            this.currentSkin = skinId;
+            this.settings.colors = this.skinColors[skinId];
+        }
     }
 
     resize() {

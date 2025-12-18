@@ -386,7 +386,10 @@ const UIManager = {
                 const skinId = e.target.value;
                 if (unlockedSkins.includes(skinId) || skinId === 'colorful') {
                     StorageManager.saveSettings({ particleSkin: skinId });
-                    // 这里可以添加粒子效果切换逻辑
+                    // 应用粒子皮肤到游戏粒子系统
+                    if (Game?.particleSystem) {
+                        Game.particleSystem.setSkin(skinId);
+                    }
                     Utils.showToast(`已切换到${e.target.options[e.target.selectedIndex].text}`, 'success');
                 } else {
                     e.target.value = settings.particleSkin || 'colorful';

@@ -203,7 +203,9 @@ const AISystem = {
 
         const candidates = [];
 
-        // 投料候选：AI目标 forward => 加反应物(降低Q)；目标 reverse => 加产物(提高Q)
+        // 投料候选：根据勒夏特列原理
+        // AI目标 forward：加反应物使平衡正向移动
+        // AI目标 reverse：加产物使平衡逆向移动
         if (profile.allowConcentration !== false) {
             const preferredSpecies = goal === 'forward' ? level?.reactants : level?.products;
             if (Array.isArray(preferredSpecies)) {
