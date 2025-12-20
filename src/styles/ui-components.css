@@ -926,8 +926,19 @@ kbd {
 }
 
 .server-controls .menu-btn {
-    flex: 1;
-    min-width: 140px;
+    white-space: nowrap;
+}
+
+/* 启动/停止窄一些，“在浏览器中打开”宽一些，避免文字换行 */
+.server-controls #btn-pwa-start,
+.server-controls #btn-pwa-stop {
+    flex: 0 0 110px;
+    min-width: 110px;
+}
+
+.server-controls #btn-pwa-open {
+    flex: 1 1 240px;
+    min-width: 240px;
 }
 
 .setting-hint {

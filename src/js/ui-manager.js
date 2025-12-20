@@ -20,6 +20,12 @@ const UIManager = {
         this.updateStarProgress();
         this.renderAboutCard();
 
+        // Web 版本不显示“PWA 服务器”状态卡片（该功能仅 Electron 内使用）
+        if (!window.electronAPI) {
+            const pwaGroup = document.getElementById('pwa-server-settings-group');
+            if (pwaGroup) pwaGroup.style.display = 'none';
+        }
+
         // 编辑器窗口保存回传（Electron）
         window.electronAPI?.onLevelEdited?.((levelData) => {
             try {
@@ -40,8 +46,43 @@ const UIManager = {
         const el = document.getElementById('about-info');
         if (!el) return;
 
+        // Electron：从主进程读取
         const info = await window.electronAPI?.getAppInfo?.();
         if (!info || info.error) {
+            // Web/PWA：从静态 app-version.json 读取（会被 SW 缓存，离线可用）
+            try {
+                const resp = await fetch('/app-version.json', { cache: 'no-store' });
+                if (resp.ok) {
+                    const data = await resp.json();
+                    const name = data?.name || 'CCBalance';
+                    const version = data?.version || '-';
+                    el.innerHTML = `
+                        <div><strong style="color: var(--text-primary);">${name}</strong></div>
+                        <div>版本：${version}</div>
+                    `;
+                    return;
+                }
+            } catch {
+                // ignore
+            }
+
+            // 最后兜底：读 manifest.json 的 version 字段（若服务器提供）
+            try {
+                const resp = await fetch('/manifest.json', { cache: 'no-store' });
+                if (resp.ok) {
+                    const data = await resp.json();
+                    const name = data?.name || 'CCBalance';
+                    const version = data?.version || '-';
+                    el.innerHTML = `
+                        <div><strong style="color: var(--text-primary);">${name}</strong></div>
+                        <div>版本：${version}</div>
+                    `;
+                    return;
+                }
+            } catch {
+                // ignore
+            }
+
             el.textContent = '无法读取版本信息';
             return;
         }
@@ -554,7 +595,7 @@ const UIManager = {
             AudioManager?.playSound?.('click');
             const status = await window.electronAPI.pwaServerStatus();
             if (status.isRunning && status.url) {
-                window.open(status.url, '_blank');
+                window.electronAPI.openExternal(status.url);
             } else {
                 this.showMessage('服务器未运行');
             }
@@ -593,10 +634,17 @@ const UIManager = {
                 urlLink.textContent = status.url;
                 urlLink.href = status.url;
                 urlLink.style.pointerEvents = 'auto';
+
+                // Electron 中点击链接也用系统默认浏览器打开
+                urlLink.onclick = (e) => {
+                    e.preventDefault();
+                    window.electronAPI?.openExternal?.(status.url);
+                };
             } else {
                 urlLink.textContent = '-';
                 urlLink.href = '#';
                 urlLink.style.pointerEvents = 'none';
+                urlLink.onclick = null;
             }
         }
     },

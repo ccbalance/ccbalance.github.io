@@ -237,13 +237,13 @@ const Terminal = {
             execute: async function() {
                 if (window.electronAPI?.getAppInfo) {
                     const info = await window.electronAPI.getAppInfo();
-                    let output = 'CCBalance v0.1.1\n\n';
+                    let output = 'CCBalance\n\n';
                     output += `Electron: ${info.runtime.electron}\n`;
                     output += `Chrome: ${info.runtime.chrome}\n`;
                     output += `Node: ${info.runtime.node}\n`;
                     return output;
                 } else {
-                    return 'CCBalance v0.1.1\n运行环境: 浏览器';
+                    return 'CCBalance \n运行环境: 浏览器';
                 }
             }
         },
@@ -357,7 +357,7 @@ const Terminal = {
      */
     printWelcome() {
         const welcome = `
-CCBalance Terminal v0.1.1
+CCBalance Terminal
 Type "help" for available commands
         `.trim();
         

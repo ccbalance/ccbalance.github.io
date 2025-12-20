@@ -36,9 +36,16 @@ class PWAServer {
 
         // Manifest 文件
         this.app.get('/manifest.json', (req, res) => {
-            res.setHeader('Content-Type', 'application/json');
+            res.setHeader('Content-Type', 'application/manifest+json');
             res.setHeader('Cache-Control', 'no-store');
             res.sendFile(path.join(__dirname, 'manifest.json'));
+        });
+
+        // Favicon
+        this.app.get('/favicon.ico', (req, res) => {
+            res.setHeader('Content-Type', 'image/x-icon');
+            res.setHeader('Cache-Control', 'public, max-age=31536000');
+            res.sendFile(path.join(__dirname, 'build/icons/icon.ico'));
         });
 
         // 版本信息（用于 Service Worker 缓存版本与 package.json 同步）

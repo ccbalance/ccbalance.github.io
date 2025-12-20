@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#00d4ff">
     <title>CCBalance - 化学平衡策略游戏</title>
-    <link rel="manifest" href="/manifest.json">
+    <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="fontawesome/css/all.min.css">
     <link rel="stylesheet" href="src/styles/main.css">
     <link rel="stylesheet" href="src/styles/particles.css">
@@ -592,7 +592,7 @@
                     </div>
                 </div>
                 
-                <div class="setting-group">
+                <div class="setting-group" id="pwa-server-settings-group">
                     <h3><i class="fas fa-server"></i> PWA 服务器</h3>
                     <div class="setting-item">
                         <span>服务器状态</span>
@@ -612,11 +612,11 @@
                     <div class="server-controls">
                         <button class="menu-btn" id="btn-pwa-start">
                             <i class="fas fa-play"></i>
-                            <span>启动服务器</span>
+                            <span>启动</span>
                         </button>
                         <button class="menu-btn danger" id="btn-pwa-stop">
                             <i class="fas fa-stop"></i>
-                            <span>停止服务器</span>
+                            <span>停止</span>
                         </button>
                         <button class="menu-btn" id="btn-pwa-open">
                             <i class="fas fa-external-link-alt"></i>
@@ -626,6 +626,33 @@
                     <div class="setting-hint">
                         <i class="fas fa-info-circle"></i>
                         <span>启动 PWA 服务器后,可在浏览器中访问应用,支持离线使用</span>
+                    </div>
+                </div>
+
+                <!-- PWA 离线资源（仅 Web/PWA 环境显示） -->
+                <div class="setting-group" id="pwa-offline-settings-group" style="display:none;">
+                    <h3><i class="fas fa-cloud-download-alt"></i> 离线资源</h3>
+                    <div class="setting-item">
+                        <span>资源状态</span>
+                        <span id="pwa-assets-status" style="color: var(--text-secondary);">未开始</span>
+                    </div>
+                    <div class="server-controls">
+                        <button class="menu-btn" id="btn-pwa-install">
+                            <i class="fas fa-download"></i>
+                            <span>安装到桌面</span>
+                        </button>
+                        <button class="menu-btn" id="btn-pwa-redownload">
+                            <i class="fas fa-redo"></i>
+                            <span>强制重下资源</span>
+                        </button>
+                        <button class="menu-btn danger" id="btn-pwa-unregister">
+                            <i class="fas fa-trash"></i>
+                            <span>注销离线/清缓存</span>
+                        </button>
+                    </div>
+                    <div class="setting-hint">
+                        <i class="fas fa-info-circle"></i>
+                        <span>安装后将自动下载全部资源，断网也能使用；若下载中断，下次会自动补全。</span>
                     </div>
                 </div>
                 
@@ -727,6 +754,7 @@
     <script src="src/js/keyboard-handler.js"></script>
     <script src="src/js/chart-renderer.js"></script>
     <script src="src/js/game.js"></script>
+    <script src="src/js/pwa-asset-manager.js"></script>
     <script src="src/js/app.js"></script>
 </body>
 </html>

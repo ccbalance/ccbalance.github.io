@@ -38,6 +38,7 @@
       "!*.md",
       "!package-lock.json"
     ],
+    "icon": "build/icons/icon.ico",
     "win": {
       "target": [
         {

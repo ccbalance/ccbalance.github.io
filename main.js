@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage } = require('electron');
+const { app, BrowserWindow, ipcMain, Tray, Menu, nativeImage, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -8,6 +8,23 @@ let editorWindow;
 let tray;
 let commandLineArgs = [];
 let pwaServer;
+
+let splashSelfcheckPayload = null;
+
+const IS_SERVER_ONLY_MODE = process.argv.includes('--pwa-server') || process.argv.includes('--server-only') || process.argv.includes('--no-window');
+
+function hasArg(name) {
+    return process.argv.includes(name);
+}
+
+function getArgValue(key) {
+    const argv = process.argv;
+    const eq = argv.find((a) => a.startsWith(`${key}=`));
+    if (eq) return eq.substring(key.length + 1);
+    const idx = argv.indexOf(key);
+    if (idx >= 0 && idx + 1 < argv.length) return argv[idx + 1];
+    return null;
+}
 
 // 动态加载 PWA 服务器(仅在需要时加载)
 function loadPWAServer() {
@@ -41,14 +58,95 @@ if (!gotTheLock) {
                 mainWindow.webContents.send('command-line-args', args);
             }
         }
+
+        // 若第二个实例是“启动 PWA 服务器”指令，则由主实例负责启动
+        try {
+            const args = commandLine.slice(1);
+            const wantsServerOnly = args.includes('--pwa-server') || args.includes('--server-only') || args.includes('--no-window');
+            if (wantsServerOnly) {
+                const server = loadPWAServer();
+                if (!server) return;
+
+                const eq = args.find((a) => a.startsWith('--port='));
+                const portRaw = eq ? eq.substring('--port='.length) : (args.includes('--port') ? args[args.indexOf('--port') + 1] : null);
+                const port = portRaw ? Number(portRaw) : null;
+                if (Number.isFinite(port) && port > 0) {
+                    try { server.init(port); } catch { /* ignore */ }
+                }
+
+                if (!server.isRunning) {
+                    server.start().then(() => {
+                        if (mainWindow) mainWindow.webContents.send('pwa-server-status-changed', server.getStatus());
+                    }).catch((e) => console.error('Failed to start PWA server:', e));
+                }
+            }
+        } catch {
+            // ignore
+        }
     });
 
     app.whenReady().then(() => {
         commandLineArgs = process.argv.slice(1);
         try {
-            createSplashWindow(() => {
-                createWindow();
-                createTray();
+            // 仅启动 PWA 服务器：不创建任何窗口（用于打包后命令行运行）
+            const serverOnly = hasArg('--pwa-server') || hasArg('--server-only') || hasArg('--no-window');
+            if (serverOnly) {
+                const server = loadPWAServer();
+                if (!server) {
+                    console.error('PWA server module not available');
+                    return;
+                }
+
+                const portRaw = getArgValue('--port');
+                const port = portRaw ? Number(portRaw) : 3000;
+                if (Number.isFinite(port) && port > 0) {
+                    try { server.init(port); } catch { /* ignore */ }
+                }
+
+                server.start().catch((e) => console.error('Failed to start PWA server:', e));
+
+                // 允许 Ctrl+C 退出
+                process.on('SIGINT', async () => {
+                    try { await server.stop(); } catch { /* ignore */ }
+                    app.quit();
+                });
+
+                return;
+            }
+
+            // 先创建 Splash，并并行预加载主窗口（但不显示），避免 Splash 结束后还要等待加载
+            createSplashWindow();
+            createWindow({ show: false });
+            createTray();
+
+            const minSplashMs = 2000;
+            const minDelay = new Promise((r) => setTimeout(r, minSplashMs));
+
+            const mainReady = new Promise((resolve) => {
+                if (!mainWindow) return resolve();
+                if (mainWindow.isDestroyed()) return resolve();
+                mainWindow.once('ready-to-show', () => resolve());
+                mainWindow.webContents.once('did-finish-load', () => resolve());
+            });
+
+            const splashDone = new Promise((resolve) => {
+                // 兜底：避免 splash 发送失败导致卡死
+                const timeout = setTimeout(() => resolve(), 6000);
+                ipcMain.once('splash-selfcheck-done', (evt, payload) => {
+                    splashSelfcheckPayload = payload || null;
+                    clearTimeout(timeout);
+                    resolve();
+                });
+            });
+
+            Promise.all([minDelay, mainReady, splashDone]).then(() => {
+                if (splashWindow && !splashWindow.isDestroyed()) {
+                    try { splashWindow.close(); } catch { /* ignore */ }
+                }
+                if (mainWindow && !mainWindow.isDestroyed()) {
+                    mainWindow.show();
+                    mainWindow.focus();
+                }
             });
         } catch (error) {
             console.error('Failed to initialize app windows/tray:', error);
@@ -58,6 +156,7 @@ if (!gotTheLock) {
 
     function getSafeAppIcon() {
         const candidates = [
+            path.join(__dirname, 'build/icons/icon.ico'),
             path.join(__dirname, 'assets/tray-icon.png'),
             path.join(__dirname, 'assets/icon.png')
         ];
@@ -95,17 +194,8 @@ function createSplashWindow(onDone) {
 
     splashWindow.on('closed', () => {
         splashWindow = null;
-        if (typeof onDone === 'function') {
-            onDone();
-        }
+        if (typeof onDone === 'function') onDone();
     });
-
-    // 3秒后关闭splash窗口
-    setTimeout(() => {
-        if (splashWindow) {
-            splashWindow.close();
-        }
-    }, 3000);
 }
 
 /**
@@ -235,7 +325,7 @@ function createEditorWindow(levelData) {
     });
 }
 
-function createWindow() {
+function createWindow({ show = true } = {}) {
     mainWindow = new BrowserWindow({
         width: 1400,
         height: 900,
@@ -244,6 +334,7 @@ function createWindow() {
         frame: false,
         transparent: false,
         backgroundColor: '#0a0a1a',
+        show: !!show,
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
@@ -253,6 +344,12 @@ function createWindow() {
     });
 
     mainWindow.loadFile('index.html');
+
+    // 阻止 window.open 创建 Electron 新窗口：改为系统默认浏览器打开
+    mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+        try { shell.openExternal(url); } catch { /* ignore */ }
+        return { action: 'deny' };
+    });
 
     // 开发模式打开DevTools
     if (process.argv.includes('--dev')) {
@@ -272,12 +369,17 @@ function createWindow() {
 }
 
 app.on('window-all-closed', () => {
+    if (IS_SERVER_ONLY_MODE) {
+        // 服务器模式：无窗口也应继续运行
+        return;
+    }
     if (process.platform !== 'darwin') {
         app.quit();
     }
 });
 
 app.on('activate', () => {
+    if (IS_SERVER_ONLY_MODE) return;
     if (mainWindow === null) {
         createWindow();
     }
@@ -381,6 +483,17 @@ ipcMain.handle('pwa-server-change-port', async (event, newPort) => {
         return result;
     } catch (error) {
         return { success: false, error: error.message };
+    }
+});
+
+// 在系统默认浏览器中打开链接（避免 window.open 打开 Electron 新窗口）
+ipcMain.handle('open-external', async (event, url) => {
+    try {
+        if (!url || typeof url !== 'string') return { success: false, error: 'invalid url' };
+        await shell.openExternal(url);
+        return { success: true };
+    } catch (e) {
+        return { success: false, error: String(e) };
     }
 });
 

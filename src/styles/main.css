@@ -157,6 +157,15 @@ html, body {
     user-select: none;
 }
 
+/* PWA/Web：不显示 Electron 自定义标题栏，并消除其布局占位 */
+body.pwa {
+    --title-bar-height: 0px;
+}
+
+body.pwa .title-bar {
+    display: none;
+}
+
 /* 表单控件/按钮默认不一定继承字体：显式设置（避免影响 FontAwesome 图标字体） */
 button,
 input,

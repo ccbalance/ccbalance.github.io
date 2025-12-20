@@ -20,6 +20,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     onPWAServerStatusChanged: (callback) => {
         ipcRenderer.on('pwa-server-status-changed', (event, status) => callback(status));
     },
+
+    // 在系统默认浏览器中打开链接
+    openExternal: (url) => ipcRenderer.invoke('open-external', url),
     
     // 关卡编辑器
     openLevelEditor: (levelData) => ipcRenderer.invoke('open-level-editor', levelData),

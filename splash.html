@@ -123,6 +123,21 @@
             font-family: var(--font-en), var(--font-zh), sans-serif;
         }
 
+        /* Splash 自检日志（版本与 CC0 之间） */
+        .selfcheck-log {
+            width: fit-content;
+            max-width: min(520px, 60vw);
+            font-size: 1rem;
+            line-height: 1.35;
+            color: rgba(255, 255, 255, 0.85);
+            font-family: var(--font-zh), var(--font-en), sans-serif;
+            white-space: pre-wrap;
+        }
+
+        .selfcheck-log .err {
+            color: #ff4d4d;
+        }
+
         /* 协议标签 - 仅显示图片，无边框无padding */
         .license-tag {
             display: inline-block;
@@ -167,6 +182,7 @@
                 <h1 id="app-title" class="title"></h1>
                 <h2 id="app-subtitle" class="subtitle"></h2>
                 <div id="app-version" class="version-tag"></div>
+                <div id="selfcheck-log" class="selfcheck-log"></div>
                 <div id="app-license" class="license-tag"></div>
             </div>
         </div>
@@ -195,6 +211,95 @@
             licenseImg.src = splashConfig.licenseImageSource;
             licenseImg.alt = splashConfig.mainTitle + ' License';
             licenseEl.appendChild(licenseImg);
+
+            // ==============================
+            // 自检：字体/音频文件是否存在
+            // ==============================
+            const logEl = document.getElementById('selfcheck-log');
+
+            const pushLine = (text, { error = false } = {}) => {
+                if (!logEl) return;
+                logEl.innerHTML = `<div class="${error ? 'err' : ''}">${text}</div>`;
+            };
+
+            const runSelfCheck = () => {
+                const { ipcRenderer } = require('electron');
+                const fs = require('fs');
+                const path = require('path');
+
+                let errors = 0;
+                const start = Date.now();
+
+                const checkFile = (relPath, label) => {
+                    try {
+                        const abs = path.join(__dirname, relPath);
+                        if (!fs.existsSync(abs)) {
+                            errors++;
+                            pushLine(`✗ 缺失：${label} (${relPath})`, { error: true });
+                            return;
+                        }
+                        const st = fs.statSync(abs);
+                        if (!st.isFile() || st.size <= 0) {
+                            errors++;
+                            pushLine(`✗ 无效：${label} (${relPath})`, { error: true });
+                            return;
+                        }
+                        pushLine(`✓ OK：${label}`);
+                    } catch {
+                        errors++;
+                        pushLine(`✗ 检查失败：${label} (${relPath})`, { error: true });
+                    }
+                };
+
+                pushLine('自检：字体/音频资源');
+
+                // 字体检查（你指定的中文字体 + 英文字体）
+                checkFile('assets/font-assets/LXGW/LXGWZhenKaiGB-Regular.ttf', '中文字体 LXGWZhenKaiGB-Regular.ttf');
+                checkFile('assets/font-assets/texgyreheros/texgyreheros-regular.otf', '英文字体 texgyreheros-regular.otf');
+
+                // 音频检查：遍历 assets/audio-assets 目录
+                try {
+                    const root = path.join(__dirname, 'assets/audio-assets');
+                    const files = [];
+                    const walk = (dir) => {
+                        const entries = fs.readdirSync(dir, { withFileTypes: true });
+                        for (const ent of entries) {
+                            const p = path.join(dir, ent.name);
+                            if (ent.isDirectory()) walk(p);
+                            else if (ent.isFile() && ent.name.toLowerCase().endsWith('.mp3')) files.push(p);
+                        }
+                    };
+                    if (fs.existsSync(root)) {
+                        walk(root);
+                        if (files.length === 0) {
+                            errors++;
+                            pushLine('✗ 未发现任何音频文件（assets/audio-assets）', { error: true });
+                        } else {
+                            pushLine(`✓ OK：音频文件 ${files.length} 个`);
+                        }
+                    } else {
+                        errors++;
+                        pushLine('✗ 缺失：assets/audio-assets 目录', { error: true });
+                    }
+                } catch {
+                    errors++;
+                    pushLine('✗ 音频目录扫描失败', { error: true });
+                }
+
+                const costMs = Date.now() - start;
+                pushLine(`自检完成：${errors ? '有问题' : '通过'}（${costMs}ms）`, { error: errors > 0 });
+
+                try {
+                    ipcRenderer.send('splash-selfcheck-done', { errors, costMs });
+                } catch {
+                    // ignore
+                }
+            };
+
+            // 稍微让 UI 先渲染一帧
+            requestAnimationFrame(() => {
+                try { runSelfCheck(); } catch { /* ignore */ }
+            });
         });
     </script>
 </body>

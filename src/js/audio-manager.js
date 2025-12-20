@@ -74,6 +74,21 @@ const AudioManager = {
         }
     },
 
+    _isPwaWeb() {
+        return !window.electronAPI && location.protocol.startsWith('http');
+    },
+
+    _resolveAudioSrc(src) {
+        if (!src) return src;
+        if (!this._isPwaWeb()) return src;
+        // PWA 使用低质量副本以加快下载/缓存
+        const prefix = 'assets/audio-assets/';
+        if (src.startsWith(prefix)) {
+            return 'assets/audio-assets-low/' + src.substring(prefix.length);
+        }
+        return src;
+    },
+
     applySettings(settings) {
         if (!settings) return;
         this.setSfxVolume(settings.sfxVolume);
@@ -102,6 +117,8 @@ const AudioManager = {
     playSfx(src, { volume = 1.0 } = {}) {
         if (!src) return;
         if (this._sfxVolume <= 0) return;
+
+        src = this._resolveAudioSrc(src);
 
         // 允许重叠播放：克隆缓存 Audio
         const base = this._getOrCreateSfx(src);
@@ -176,7 +193,7 @@ const AudioManager = {
         // 先中断旧的
         this.stopSteamProducing();
 
-        const audio = new Audio(this.SFX.steamProducing);
+        const audio = new Audio(this._resolveAudioSrc(this.SFX.steamProducing));
         audio.volume = 0.9 * this._sfxVolume;
         audio.play().catch(() => {
             // ignore
@@ -228,6 +245,7 @@ const AudioManager = {
      * 内部：切换 BGM，并执行渐入渐出。
      */
     _playBgm(nextSrc, { loop = true, fadeMs = 800 } = {}) {
+        nextSrc = this._resolveAudioSrc(nextSrc);
         if (nextSrc && nextSrc === this._currentBgmSrc && this._currentBgm && !this._currentBgm.paused) {
             // 已在播放同一首
             return;
@@ -265,8 +283,12 @@ const AudioManager = {
         const startNext = () => {
             const playPromise = nextAudio.play();
             if (playPromise && typeof playPromise.catch === 'function') {
-                playPromise.catch(() => {
-                    // 自动播放受限：保持 desired，不打断 UI
+                playPromise.then(() => {
+                    // 只有在真正开始播放后才清空 desired（否则 PWA 首次加载会因 autoplay 被拦截而永远不重试）
+                    if (this._desiredBgmSrc === nextSrc) this._desiredBgmSrc = null;
+                }).catch(() => {
+                    // 自动播放受限：保留 desired，等待首次用户交互时重试
+                    try { nextAudio.pause(); } catch { /* ignore */ }
                 });
             }
         };
@@ -299,7 +321,6 @@ const AudioManager = {
                 }
 
                 nextAudio.volume = this._bgmVolume;
-                this._desiredBgmSrc = null;
             }
         }, 30);
     },
@@ -326,13 +347,30 @@ const AudioManager = {
 
     _tryPlayDesiredBgm() {
         if (!this._desiredBgmSrc) return;
-        // 触发一次重新切换即可
         const src = this._desiredBgmSrc;
+
+        // 如果当前就是这首但被暂停（常见于 PWA autoplay 拦截），优先尝试直接 resume
+        if (this._currentBgm && this._currentBgmSrc === src && this._currentBgm.paused) {
+            const p = this._currentBgm.play();
+            if (p && typeof p.then === 'function') {
+                p.then(() => {
+                    if (this._desiredBgmSrc === src) this._desiredBgmSrc = null;
+                }).catch(() => {
+                    // 仍被拦截：保持 desired
+                });
+            } else {
+                // 不返回 Promise 的宿主：认为已开始
+                this._desiredBgmSrc = null;
+            }
+            return;
+        }
+
+        // 触发一次重新切换即可（不要在这里清空 desired，让 _playBgm 的成功回调决定）
         this._playBgm(src, { loop: true, fadeMs: 0 });
-        this._desiredBgmSrc = null;
     },
 
     _getOrCreateSfx(src) {
+        src = this._resolveAudioSrc(src);
         const cached = this._sfxCache.get(src);
         if (cached) return cached;
 

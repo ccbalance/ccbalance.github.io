@@ -36,6 +36,11 @@ const App = {
         console.log(`${AppConfig.name} v${AppConfig.version} 正在初始化...`);
 
         try {
+            // PWA/Web 环境标记（用于隐藏 Electron 自定义标题栏等）
+            if (!window.electronAPI && location.protocol.startsWith('http')) {
+                document.body.classList.add('pwa');
+            }
+
             // 初始化存储
             StorageManager.init();
 
